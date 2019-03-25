@@ -69,7 +69,7 @@ module.exports = class Keystone {
     const adapterName = config.adapterName || this.defaultAdapter;
     const list = new List(key, config, {
       getListByKey,
-      getGraphQLQuery: apiName => this._graphQLQueryFuncs[apiName],
+      getGraphQLQuery: schemaName => this._graphQLQueryFuncs[schemaName],
       adapter: adapters[adapterName],
       defaultAccess: this.defaultAccess,
       getAuth: () => this.auth[key],
@@ -226,8 +226,8 @@ module.exports = class Keystone {
   // It's not Keystone core's responsibility to create an executable schema, but
   // once one is, Keystone wants to be able to expose the ability to query that
   // schema, so this function enables other modules to register that function.
-  registerExecutableSchema(apiName, schema) {
-    this._graphQLQueryFuncs[apiName] = (query, context, variables) =>
+  registerExecutableSchema(schemaName, schema) {
+    this._graphQLQueryFuncs[schemaName] = (query, context, variables) =>
       graphql(schema, query, null, context, variables);
   }
 

@@ -7,6 +7,7 @@ const expressSession = require('express-session');
 const cookieSignature = require('cookie-signature');
 const createGraphQLMiddleware = require('./graphql');
 const initConfig = require('./initConfig');
+const { createApolloServer } = require('./apolloServer.js');
 
 const COOKIE_NAME = 'keystone.sid';
 
@@ -91,9 +92,9 @@ module.exports = class WebServer {
     const { apiPath, graphiqlPath, apollo, port } = this.config;
 
     // GraphQL API always exists independent of any adminUI or Session settings
-    this.app.use(
-      createGraphQLMiddleware(keystone, { apiPath, graphiqlPath, apolloConfig: apollo, port })
-    );
+    const schemaName = 'admin';
+    const server = createApolloServer(keystone, schemaName, apollo);
+    this.app.use(createGraphQLMiddleware(server, { apiPath, graphiqlPath, port }));
 
     if (adminUI) {
       // This must be last as it's the "catch all" which falls into Webpack to

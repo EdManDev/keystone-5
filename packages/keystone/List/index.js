@@ -205,8 +205,8 @@ module.exports = class List {
             getFieldAccessControlForUser: () => true,
           };
         }
-        const apiName = 'admin';
-        const graphQLQuery = getGraphQLQuery(apiName);
+        const schemaName = 'admin';
+        const graphQLQuery = getGraphQLQuery(schemaName);
 
         if (!graphQLQuery) {
           return Promise.reject(
