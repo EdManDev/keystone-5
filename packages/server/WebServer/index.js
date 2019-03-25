@@ -89,11 +89,12 @@ module.exports = class WebServer {
       this.app.use(adminUI.createSessionMiddleware());
     }
 
-    const { apiPath, graphiqlPath, apollo, port } = this.config;
-
     // GraphQL API always exists independent of any adminUI or Session settings
+    const { apollo } = this.config;
     const schemaName = 'admin';
     const server = createApolloServer(keystone, apollo, schemaName);
+
+    const { apiPath, graphiqlPath, port } = this.config;
     this.app.use(createGraphQLMiddleware(server, { apiPath, graphiqlPath, port }));
 
     if (adminUI) {
