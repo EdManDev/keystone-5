@@ -137,7 +137,7 @@ const _formatError = error => {
   }
 };
 
-module.exports = function createApolloServer(keystone, schemaName, apolloConfig) {
+module.exports = function createApolloServer(keystone, apolloConfig, schemaName) {
   // Create an ApolloServer with the appropriate schema/context function
   const server = new ApolloServer({
     maxFileSize: 200 * 1024 * 1024,
@@ -158,6 +158,8 @@ module.exports = function createApolloServer(keystone, schemaName, apolloConfig)
   });
 
   // Add the ability to programmatically execute queries against the schema
-  keystone.registerExecutableSchema(schemaName, server.schema);
+  if (schemaName) {
+    keystone.registerExecutableSchema(schemaName, server.schema);
+  }
   return server;
 };

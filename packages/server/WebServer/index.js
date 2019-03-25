@@ -7,7 +7,7 @@ const expressSession = require('express-session');
 const cookieSignature = require('cookie-signature');
 const createGraphQLMiddleware = require('./graphql');
 const initConfig = require('./initConfig');
-const { createApolloServer } = require('./apolloServer.js');
+const createApolloServer = require('./apolloServer.js');
 
 const COOKIE_NAME = 'keystone.sid';
 
@@ -93,7 +93,7 @@ module.exports = class WebServer {
 
     // GraphQL API always exists independent of any adminUI or Session settings
     const schemaName = 'admin';
-    const server = createApolloServer(keystone, schemaName, apollo);
+    const server = createApolloServer(keystone, apollo, schemaName);
     this.app.use(createGraphQLMiddleware(server, { apiPath, graphiqlPath, port }));
 
     if (adminUI) {
