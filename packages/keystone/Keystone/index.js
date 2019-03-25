@@ -1,6 +1,7 @@
 const GraphQLJSON = require('graphql-type-json');
 const fs = require('fs');
 const gql = require('graphql-tag');
+const { graphql } = require('graphql');
 const fastMemoize = require('fast-memoize');
 const { print } = require('graphql/language/printer');
 const {
@@ -38,6 +39,7 @@ module.exports = class Keystone {
     this.listsArray = [];
     this.getListByKey = key => this.lists[key];
     this.sessionManager = new SessionManager(this);
+    this._graphQLQueryFuncs = {};
 
     if (config.adapters) {
       this.adapters = config.adapters;
@@ -49,6 +51,7 @@ module.exports = class Keystone {
       throw new Error('Need an adapter, yo');
     }
   }
+
   createAuthStrategy(options) {
     const { type: StrategyType, list: listKey, config } = options;
     const { authType } = StrategyType;
@@ -66,7 +69,7 @@ module.exports = class Keystone {
     const adapterName = config.adapterName || this.defaultAdapter;
     const list = new List(key, config, {
       getListByKey,
-      getGraphQLQuery: () => this._graphQLQuery,
+      getGraphQLQuery: apiName => this._graphQLQueryFuncs[apiName],
       adapter: adapters[adapterName],
       defaultAccess: this.defaultAccess,
       getAuth: () => this.auth[key],
@@ -223,8 +226,9 @@ module.exports = class Keystone {
   // It's not Keystone core's responsibility to create an executable schema, but
   // once one is, Keystone wants to be able to expose the ability to query that
   // schema, so this function enables other modules to register that function.
-  registerGraphQLQueryMethod(queryMethod) {
-    this._graphQLQuery = queryMethod;
+  registerExecutableSchema(apiName, schema) {
+    this._graphQLQueryFuncs[apiName] = (query, context, variables) =>
+      graphql(schema, query, null, context, variables);
   }
 
   getAdminSchema() {

@@ -8,7 +8,6 @@ const chalk = require('chalk');
 const logger = require('@keystone-alpha/logger');
 const falsey = require('falsey');
 const { omit } = require('@keystone-alpha/utils');
-const { graphql } = require('graphql');
 const StackUtils = require('stack-utils');
 const ensureError = require('ensure-error');
 const terminalLink = require('terminal-link');
@@ -173,23 +172,7 @@ module.exports = function createGraphQLMiddleware(
   keystone,
   { apiPath, graphiqlPath, apolloConfig, port }
 ) {
-  const app = express();
-
-  if (graphiqlPath) {
-    if (process.env.NODE_ENV !== 'production') {
-      const devQueryPath = `${graphiqlPath}/go`;
-      ttyLink('GraphQL Debug Links:', devQueryPath, port);
-
-      if (falsey(process.env.DISABLE_LOGGING)) {
-        // NOTE: Must come before we setup the API below
-        addDevQueryMiddlewares(app, apiPath, graphiqlPath, devQueryPath);
-      }
-    }
-    ttyLink('GraphQL Playground:', graphiqlPath, port, playgroundPkg.version);
-    app.use(graphiqlPath, graphiqlMiddleware(apiPath));
-  }
-
-  // add the Admin GraphQL API
+  // Create an ApolloServer with the appropriate schema/context function
   const server = new ApolloServer({
     maxFileSize: 200 * 1024 * 1024,
     maxFiles: 5,
@@ -207,9 +190,25 @@ module.exports = function createGraphQLMiddleware(
         }),
     formatError: _formatError,
   });
-  keystone.registerGraphQLQueryMethod((query, context, variables) =>
-    graphql(server.schema, query, null, context, variables)
-  );
+
+  // Add the ability to programmatically execute queries against the schema
+  keystone.registerExecutableSchema('admin', server.schema);
+
+  // Create an express middleware with the appropriate routes
+  const app = express();
+  if (graphiqlPath) {
+    if (process.env.NODE_ENV !== 'production') {
+      const devQueryPath = `${graphiqlPath}/go`;
+      ttyLink('GraphQL Debug Links:', devQueryPath, port);
+
+      if (falsey(process.env.DISABLE_LOGGING)) {
+        // NOTE: Must come before we setup the API below
+        addDevQueryMiddlewares(app, apiPath, graphiqlPath, devQueryPath);
+      }
+    }
+    ttyLink('GraphQL Playground:', graphiqlPath, port, playgroundPkg.version);
+    app.use(graphiqlPath, graphiqlMiddleware(apiPath));
+  }
 
   ttyLink('GraphQL API:', apiPath, port);
   // { cors: false } - prevent ApolloServer from overriding Keystone's CORS configuration.
