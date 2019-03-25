@@ -22,7 +22,7 @@ const AdminUI = require('../../server/AdminUI.js');
 
 const keystone = {
   sessionManager: {},
-  getAdminSchema: jest.fn(),
+  getSchema: jest.fn(),
   getAdminMeta: jest.fn(),
 };
 const adminPath = 'admin_path';

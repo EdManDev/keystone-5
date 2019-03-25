@@ -137,14 +137,19 @@ const _formatError = error => {
   }
 };
 
-module.exports = function createApolloServer(keystone, apolloConfig, schemaName) {
+module.exports = function createApolloServer(
+  keystone,
+  apolloConfig,
+  schemaName,
+  accessRestriction
+) {
   // Create an ApolloServer with the appropriate schema/context function
   const server = new ApolloServer({
     maxFileSize: 200 * 1024 * 1024,
     maxFiles: 5,
     ...apolloConfig,
-    ...keystone.getAdminSchema(),
-    context: ({ req }) => keystone.getAccessContext(req),
+    ...keystone.getSchema(accessRestriction),
+    context: ({ req }) => keystone.getAccessContext(accessRestriction)(req),
     ...(process.env.ENGINE_API_KEY
       ? {
           engine: { apiKey: process.env.ENGINE_API_KEY },
