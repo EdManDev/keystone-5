@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { session: { startAuthedSession, endAuthedSession } } = require('@keystone-alpha/keystone');
+const {
+  session: { startAuthedSession, endAuthedSession },
+} = require('@keystone-alpha/keystone');
 
 const formatResponse = (res, htmlResponse, json) =>
   res.format({

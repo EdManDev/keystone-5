@@ -1,5 +1,8 @@
 const supertest = require('supertest-light');
-const { Keystone, session: { startAuthedSession, endAuthedSession } } = require('@keystone-alpha/keystone');
+const {
+  Keystone,
+  session: { startAuthedSession, endAuthedSession },
+} = require('@keystone-alpha/keystone');
 const { Text, Password } = require('@keystone-alpha/fields');
 const { WebServer } = require('@keystone-alpha/server');
 const PasswordAuthStrategy = require('@keystone-alpha/keystone/auth/Password');

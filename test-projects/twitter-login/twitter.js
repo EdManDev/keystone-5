@@ -1,5 +1,7 @@
 const TwitterAuthStrategy = require('@keystone-alpha/keystone/auth/Twitter');
-const { session: { startAuthedSession } } = require('@keystone-alpha/keystone');
+const {
+  session: { startAuthedSession },
+} = require('@keystone-alpha/keystone');
 const { appURL, twitterAppKey, twitterAppSecret } = require('./config');
 
 exports.configureTwitterAuth = function(keystone, server) {

@@ -1,6 +1,8 @@
 const keystone = require('@keystone-alpha/core');
 const bodyParser = require('body-parser');
-const { session: { startAuthedSession, endAuthedSession } } = require('@keystone-alpha/keystone');
+const {
+  session: { startAuthedSession, endAuthedSession },
+} = require('@keystone-alpha/keystone');
 const { port, staticRoute, staticPath } = require('./config');
 
 const initialData = require('./data');
