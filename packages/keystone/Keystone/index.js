@@ -229,7 +229,7 @@ module.exports = class Keystone {
       graphql(schema, query, null, context, variables);
   }
 
-  getSchema(accessRestriction) {
+  getSchema(/*accessRestriction*/) {
     // FIXME: consolidate accessRestriction
     const typeDefs = this.getTypeDefs();
     if (debugGraphQLSchemas()) {
@@ -339,7 +339,7 @@ module.exports = class Keystone {
 
   // Create an access context for the given "user" which can be used to call the
   // List API methods which are access controlled.
-  getAccessContext(accessRestriction) {
+  getAccessContext(/*accessRestriction*/) {
     // FIXME: Use accessRestriction
     return ({ user, authedListKey }) => {
       // memoizing to avoid requests that hit the same type multiple times.
