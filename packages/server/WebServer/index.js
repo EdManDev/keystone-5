@@ -8,10 +8,11 @@ const cookieSignature = require('cookie-signature');
 const createGraphQLMiddleware = require('./graphql');
 const initConfig = require('./initConfig');
 const createApolloServer = require('./apolloServer.js');
+const { populateAuthedItemMiddleware } = require('@keystone-alpha/keystone/session');
 
-const COOKIE_NAME = 'keystone.sid';
+const sessionCommonMiddleware = (keystone, cookieSecret, sessionStore) => {
+  const COOKIE_NAME = 'keystone.sid';
 
-const sessionCommonMiddleware = (sessionManager, cookieSecret, sessionStore) => {
   // We have at least one auth strategy
   // Setup the session as the very first thing.
   // The way express works, the `req.session` (and, really, anything added
@@ -29,7 +30,7 @@ const sessionCommonMiddleware = (sessionManager, cookieSecret, sessionStore) => 
       return next();
     }
 
-    const [type, token] = req.headers['authorization'].split(' ');
+    const [type, token] = (req.headers.authorization || req.headers.Authorization).split(' ');
 
     if (type !== 'Bearer') {
       // TODO: Use logger
@@ -60,11 +61,7 @@ const sessionCommonMiddleware = (sessionManager, cookieSecret, sessionStore) => 
     store: sessionStore,
   });
 
-  return [
-    injectAuthCookieMiddleware,
-    sessionMiddleware,
-    sessionManager.populateAuthedItemMiddleware,
-  ];
+  return [injectAuthCookieMiddleware, sessionMiddleware, populateAuthedItemMiddleware(keystone)];
 };
 
 module.exports = class WebServer {
@@ -85,9 +82,7 @@ module.exports = class WebServer {
     }
 
     if (Object.keys(keystone.auth).length > 0) {
-      this.app.use(
-        sessionCommonMiddleware(this.keystone.sessionManager, cookieSecret, sessionStore)
-      );
+      this.app.use(sessionCommonMiddleware(this.keystone, cookieSecret, sessionStore));
     }
 
     if (adminUI && adminUI.authStrategy) {

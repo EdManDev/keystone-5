@@ -51,7 +51,6 @@ module.exports = class AdminUI {
     const { signinPath, signoutPath, sessionPath } = this.config;
     return createSessionMiddleware(
       { signinPath, signoutPath, sessionPath, successPath: this.adminPath },
-      this.keystone.sessionManager,
       this.authStrategy
     );
   }

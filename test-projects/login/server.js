@@ -1,6 +1,6 @@
 const keystone = require('@keystone-alpha/core');
 const bodyParser = require('body-parser');
-
+const { startAuthedSession, endAuthedSession } = require('@keystone-alpha/keystone/session');
 const { port, staticRoute, staticPath } = require('./config');
 
 const initialData = require('./data');
@@ -33,7 +33,7 @@ keystone
       bodyParser.urlencoded({ extended: true }),
       async (req, res, next) => {
         // Cleanup any previous session
-        await keystoneApp.sessionManager.endAuthedSession(req);
+        await endAuthedSession(req);
 
         try {
           const result = await keystoneApp.auth.User.password.validate({
@@ -45,7 +45,7 @@ keystone
               success: false,
             });
           }
-          await keystoneApp.sessionManager.startAuthedSession(req, result);
+          await startAuthedSession(req, result);
           res.json({
             success: true,
             itemId: result.item.id,
@@ -59,7 +59,7 @@ keystone
 
     server.app.get('/signout', async (req, res, next) => {
       try {
-        await keystoneApp.sessionManager.endAuthedSession(req);
+        await endAuthedSession(req);
         res.json({
           success: true,
         });

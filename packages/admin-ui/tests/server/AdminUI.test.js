@@ -21,7 +21,6 @@ jest.doMock('html-webpack-plugin', () => {
 const AdminUI = require('../../server/AdminUI.js');
 
 const keystone = {
-  sessionManager: {},
   getSchema: jest.fn(),
   getAdminMeta: jest.fn(),
 };

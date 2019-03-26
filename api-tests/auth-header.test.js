@@ -1,5 +1,5 @@
 const supertest = require('supertest-light');
-const { Keystone } = require('@keystone-alpha/keystone');
+const { Keystone, session } = require('@keystone-alpha/keystone');
 const { Text, Password } = require('@keystone-alpha/fields');
 const { WebServer } = require('@keystone-alpha/server');
 const PasswordAuthStrategy = require('@keystone-alpha/keystone/auth/Password');
@@ -60,7 +60,7 @@ function setupKeystone() {
     bodyParser.urlencoded({ extended: true }),
     async (req, res, next) => {
       // Cleanup any previous session
-      await keystone.sessionManager.endAuthedSession(req);
+      await session.endAuthedSession(req);
 
       try {
         const result = await keystone.auth.User.password.validate({
@@ -72,7 +72,7 @@ function setupKeystone() {
             success: false,
           });
         }
-        await keystone.sessionManager.startAuthedSession(req, result);
+        await startAuthedSession(req, result);
         res.json({
           success: true,
           token: req.sessionID,

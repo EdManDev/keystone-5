@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const { startAuthedSession, endAuthedSession } = require('@keystone-alpha/keystone/session');
 
 const formatResponse = (res, htmlResponse, json) =>
   res.format({
@@ -11,11 +12,7 @@ const formatResponse = (res, htmlResponse, json) =>
 const redirectSuccessfulSignin = (target, req, res) =>
   formatResponse(res, () => res.redirect(target), { success: true });
 
-const signin = (signinPath, successPath, sessionManager, authStrategy) => async (
-  req,
-  res,
-  next
-) => {
+const signin = (signinPath, successPath, authStrategy) => async (req, res, next) => {
   try {
     // TODO: How could we support, for example, the twitter auth flow?
     const result = await authStrategy.validate({
@@ -29,7 +26,7 @@ const signin = (signinPath, successPath, sessionManager, authStrategy) => async 
       return formatResponse(res, htmlResponse, { success: false, message: result.message });
     }
 
-    await sessionManager.startAuthedSession(req, result);
+    await startAuthedSession(req, result);
   } catch (e) {
     return next(e);
   }
@@ -37,10 +34,10 @@ const signin = (signinPath, successPath, sessionManager, authStrategy) => async 
   return redirectSuccessfulSignin(successPath, req, res);
 };
 
-const signout = sessionManager => async (req, res, next) => {
+const signout = async (req, res, next) => {
   let success;
   try {
-    await sessionManager.endAuthedSession(req);
+    await endAuthedSession(req);
     success = true;
   } catch (e) {
     success = false;
@@ -62,7 +59,6 @@ const session = (req, res) => {
 
 const createSessionMiddleware = (
   { signinPath, signoutPath, sessionPath, successPath },
-  sessionManager,
   authStrategy
 ) => {
   const app = express();
@@ -73,11 +69,11 @@ const createSessionMiddleware = (
     signinPath,
     bodyParser.json(),
     bodyParser.urlencoded({ extended: true }),
-    signin(signinPath, successPath, sessionManager, authStrategy)
+    signin(signinPath, successPath, authStrategy)
   );
 
   // Listen to both POST and GET events, and always sign the user out.
-  app.use(signoutPath, signout(sessionManager));
+  app.use(signoutPath, signout);
 
   // Allow clients to AJAX for user info
   app.get(sessionPath, session);
