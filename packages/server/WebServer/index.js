@@ -8,7 +8,7 @@ const cookieSignature = require('cookie-signature');
 const createGraphQLMiddleware = require('./graphql');
 const initConfig = require('./initConfig');
 const createApolloServer = require('./apolloServer.js');
-const { populateAuthedItemMiddleware } = require('@keystone-alpha/keystone/session');
+const { session: { populateAuthedItemMiddleware } } = require('@keystone-alpha/keystone');
 
 const sessionCommonMiddleware = (keystone, cookieSecret, sessionStore) => {
   const COOKIE_NAME = 'keystone.sid';
